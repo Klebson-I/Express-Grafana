@@ -1,6 +1,16 @@
 import express from 'express';
+import Prometheus from 'express-prom-bundle';
+import cors from 'cors';
 const app = express();
 const port = 3000;
+
+const metricsMiddleware = Prometheus({
+    metricsPath: '/metrics', // Endpoint to expose metrics
+});
+
+app.use(metricsMiddleware);
+
+app.use(cors());
 
 app.get('/', (req, res) => {
     console.log('/')
@@ -17,14 +27,15 @@ app.get('/log', (req, res) => {
     });
 });
 
-app.get('/collapse', (req, res) => {
+app.get('/collapse/:iteration', (req, res) => {
     console.log('/collapse');
-    for (let i = 0; i < 1000000000000; i++) {}
+    const { iteration } = req.params;
+    for (let i = 0; i < iteration; i++) {}
     res.json({
         result: 'Collapse',
     });
 });
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
     console.log('App is running');
 })
